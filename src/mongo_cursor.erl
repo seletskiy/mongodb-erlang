@@ -68,6 +68,7 @@ xnext (Env = {DbConn, Coll, BatchSize}, {CursorId, Docs}) -> case Docs of
 		_ ->
 			Getmore = #getmore {collection = Coll, batchsize = BatchSize, cursorid = CursorId},
 			Reply = mongo_connect:call (DbConn, [], Getmore),
+			timer:sleep(100),
 			xnext (Env, batch_reply (Reply)) end end.
 
 -spec batch_reply (mongo_protocol:reply()) -> batch(). % IO throws expired
