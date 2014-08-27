@@ -208,10 +208,18 @@ write (Write) ->
 			Ack = mongo_query:write (Context #context.dbconn, Write, Params),
 			put (mongo_lasterror, Ack),
 			case bson:lookup (err, Ack) of
-				{} -> ok; {undefined} -> ok;
+				{} -> updateCheck(Ack); {undefined} -> updateCheck(Ack);
 				{String} -> case bson:at (code, Ack) of
 					10058 -> throw (not_master);
 					Code -> throw ({write_failure, Code, String}) end end end.
+
+updateCheck(Ack) ->
+	case bson:lookup(updatedExisting, Ack) of
+		{false} ->
+			not_exist;
+		_ ->
+			ok
+	end.
 
 -spec insert (collection(), bson:document()) -> bson:value(). % Action
 %@doc Insert document into collection. Return its '_id' value, which is auto-generated if missing.
